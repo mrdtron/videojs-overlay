@@ -35,7 +35,7 @@ const isNumber = n => typeof n === 'number' && n === n;
 /**
  * Whether a value is a string with no whitespace.
  *
- * @param  {String} s
+ * @param  {String}
  * @return {Boolean}
  */
 const hasNoWhitespace = s => typeof s === 'string' && (/^\S+$/).test(s);
@@ -321,16 +321,23 @@ const plugin = function(options) {
 
   this.overlays_ = overlays.map(o => {
     const mergeOptions = videojs.mergeOptions(settings, o);
+    // We want our overlay inserted after the tech so it doesn't cover
+    // other elements like text track display, big play button etc
+    let childIndex = this.children_.length - (this.children_.length - 1);
 
     // Attach bottom aligned overlays to the control bar so
     // they will adjust positioning when the control bar minimizes
     if (mergeOptions.attachToControlBar &&
         this.controlBar &&
         mergeOptions.align.indexOf('bottom') !== -1) {
-      return this.controlBar.addChild('overlay', mergeOptions);
+      // if overlay is added to the control bar at the bottom position
+      // insert it after play button so it doesn't overlay
+      // menus such as vertical volume, captions or alternate audio
+      childIndex = this.controlBar.children_.length - (this.controlBar.children_.length - 1);
+      return this.controlBar.addChild('overlay', mergeOptions, childIndex);
     }
 
-    return this.addChild('overlay', mergeOptions);
+    return this.addChild('overlay', mergeOptions, childIndex);
   });
 };
 
